@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+    <title>Segmented slider</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="segmented-slider" data-init-green="40" data-init-amber="60">
+        <ul class="point-container">
+            <li>0</li>
+            <li>10</li>
+            <li>20</li>
+            <li>30</li>
+            <li>40</li>
+            <li>50</li>
+            <li>60</li>
+            <li>70</li>
+            <li>80</li>
+            <li>90</li>
+            <li>100</li>
+        </ul>
+        <div class="handle-container">
+            <div class="segment green"></div>
+            <div class="segment amber"></div>
+            <div class="segment red"></div>
+            <div class="handle green"></div>
+            <div class="handle amber"></div>
+        </div>
+    </div>
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="js/jquery.event.drag-2.2.js"></script>
+    <script src="js/segmented-slider.js"></script>
+    <script>
+        $(function() {
+            $(".segmented-slider").segmentedSlider(function(greenPoint, amberPoint) {
+                $(".handle.green").text(greenPoint);
+                $(".handle.amber").text(amberPoint);
+            });
+        });
+    </script>
+</body>
+</html>
