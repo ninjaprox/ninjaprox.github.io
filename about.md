@@ -4,12 +4,10 @@ title: About
 permalink: /about/
 ---
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](http://jekyllrb.com/)
+I'm Vinh Nguyen, a generalist and iOS specialist.
 
-You can find the source code for the Jekyll new theme at:
-{% include icon-github.html username="jekyll" %} /
-[minima](https://github.com/jekyll/minima)
+Here you find things I learn and share with others by writting.
 
-You can find the source code for Jekyll at
-{% include icon-github.html username="jekyll" %} /
-[jekyll](https://github.com/jekyll/jekyll)
+Topics I concern include mobile development, UI/UX, application architecture, working methodology and entrepreneur, but are not limited just so.
+
+I'm curious about human behavior and reads about psychology when technology gets too boring for me. LEGO is always his favorite toy and photography is my new friend.
