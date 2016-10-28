@@ -203,7 +203,7 @@ Now see the graph.
 
 There are only 2 references and clearly, class outperforms in this scenario. Myth number 2, solved!
 
-With new things introduced in Foundation framework, using proper data type will help avoid these problem in struct whilst take advantage of struct.
+With new things introduced in Foundation framework, using proper data type will help avoid these problems in struct whilst take advantage of struct.
 
 # Conclusion
 
