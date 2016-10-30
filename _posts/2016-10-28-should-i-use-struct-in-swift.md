@@ -98,7 +98,7 @@ assert(a.view1ForReading.backgroundColor != aa.view1ForReading.backgroundColor)
 
 Indirect storage called `_view1` is used to actually store reference type data, other two computed properties `view1ForReading` and `view1ForWriting` are for reading and writing purpose respectively. The `view1ForReading` simply returns indirect storage. On the other hand, `view1ForWriting`'s job is more complex. On getting, it checks if `_view1` is uniquely referenced, otherwise it creates a new copy of indirect storage then assign back to storage itself. On setting, straightforwardly, it sets new value to indirect storage. Consequence of this is we have separate instances and prevent unintended change.
 
-_**Note:** You may ask why `(aa.view1ForWriting).backgroundColor` instead of `aa.view1ForWriting.backgroundColor`? Using the later invoke getter twice and I still don't understand this behavior in Swift, will update if found anything._
+~~_**Note:** You may ask why `(aa.view1ForWriting).backgroundColor` instead of `aa.view1ForWriting.backgroundColor`? Using the later invokes getter twice and I still don't understand this behavior in Swift, will update if found anything._~~ This happened because I ran it on playground. I also asked on [StackOverflow](http://stackoverflow.com/questions/40316929/getter-of-computed-property-called-twice?noredirect=1#comment67891599_40316929) and found reasonable explanation for this.
 
 _**Caution:** This code doesn't work as I expected. In fact, `isKnownUniquelyReferenced(&_view1)` always returns `false`, that results in copying every time there is change on `_view1`'s property and it is inefficient. Same as above, will update if found anything._
 
