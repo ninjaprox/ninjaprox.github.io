@@ -201,3 +201,7 @@ echo "$version"
 You can add things like to create a new commit after bump version, tag the commit with the new version, it is totally open to your requirements.
 
 Bump version is just one simple example what we can do with `PlistBuddy`. Now we can add PlistBuddy to our toolbelt and use it anytime we need to manipulate a plist file.
+
+## Reference
+
+I recommend to read [Xcode - xcworkspace and xcodeproj](http://neurocline.github.io/dev/2016/04/16/xcode-xcworkspace-and-xcodeproj.html) to understand the structure of `xcworkspace` and `xcodeproj`, it is especially helpful when you need to do complex tasks. In the article, you can find other resources to dig deeper as you want.
