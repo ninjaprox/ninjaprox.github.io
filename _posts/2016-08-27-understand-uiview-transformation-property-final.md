@@ -5,7 +5,7 @@ title: Understanding UIView’s transform property (final)
 
 In previous part, we talked about 4 properties of `UIView` and relationships between them. This part we cover operations with `transform` and how to persist `UIView` information. Let's go!
 
-# `transform` operations
+## `transform` operations
 
 `transform` is type of `CGAffineTransform` and it represents a matrix used for affine transformation. Speaking of the matrix and and affine transformation, it is beyond context of this article, but if you wonder and want to learn more, this [wiki](https://en.wikipedia.org/wiki/Affine_transformation) would be a good start.
 
@@ -19,7 +19,7 @@ When `transform` is used for only one transformation, it is straightforward to e
 
 ----------
 
-## Extract
+#### Extract
 
 Right below is snippet for scale extraction
 
@@ -40,7 +40,7 @@ func rotationOf(transform: CGAffineTransform) -> CGFloat {
 }
 ```
 
-## Restore
+#### Restore
 
 In reverse, `CoreGraphics` provides handy functions to create `CGAffineTransform` from transformation information.
 
@@ -56,7 +56,7 @@ Because order of transformation matters, in case of combination of scale and rot
 view.transform = CGAffineTransform(a: a, b: b, c: c, d: d, tx: x, ty: y);
 ```
 
-# Persistence
+## Persistence
 
 When comes with `UIView` information persistence, especially with `transform` is applied, note following things:
 
@@ -67,7 +67,7 @@ When comes with `UIView` information persistence, especially with `transform` is
 
 So what information we need to persist? They are position in superview, size and transformation. With transformation, we can persist `transform` as a whole or individual one.
 
-## Position
+#### Position
 
 The best way is to persist `center`, as `center` is independent of `transform`, it is safe to position view regardless of `transform`. 
 
@@ -81,7 +81,7 @@ However, in some scenarios, `frame.origin` may be useful, then we need calculati
 let persistedPosition = frame.origin
 ```
 
-## Size
+#### Size
 
 Both `bounds.size` and `frame.size` cannot be used for size persistence, because they do not reflect correct view's size. `bounds.size` is original value before transformation. And `frame.size` is size of boundary view, not actual view.
 
@@ -94,7 +94,7 @@ let persistedSize = CGSize(width: view.bounds.size.width * scale.x, height: view
 
 If we count actual view's size in persistence, `transform` we persist should contain only rotation transformation. This is due of restore phrase later. Otherwise, restoration will get unnecessary calculation, now or later is of your choice. Then I choose now and it also makes more sense to persist real view's size than its original one.
 
-## Transformation
+#### Transformation
 
 How to persist position and size affects how to do with transformation, actually, only size does. As stated right above, if we persist actual view's size, rotation is the only thing we need for transformation.
 
@@ -113,7 +113,7 @@ let d = view.transform.d
 
 With these values, it is easy to restore `transform` as talked above.
 
-## Restore
+#### Restore
 
 Make assumption that we are persisting actual view's size, its rotation and `center`, now it is time to restore the view from that.
 
@@ -131,6 +131,6 @@ view.transform = CGAffineTransformMakeRotation(persistedRotation)
 view.center = CGPoint(x: persistedPosition.x + view.frame.size.width / 2, y: persistedPosition.y + view.frame.size.height / 2)
 ```
 
-# Conclusion
+## Conclusion
 
 There are still many more to talk about `UIView`, however, with this article, `transform` property is not scary anymore, huh? From here, we can keep learning `layer.anchorPoint` which is also relevant to `transform`, animation with `transform` and other 3 properties, etc. Happy learning!

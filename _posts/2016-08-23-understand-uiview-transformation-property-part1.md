@@ -5,7 +5,7 @@ title: Understanding UIView’s transform property (part 1)
 
 Working with `transform` property of `UIView` might be frustrated at the first time. Confusion of using `transform` leads to difficulty in controlling `UIView` as well as persisting `UIView` information. This article helps demystify this.
 
-# Basics
+## Basics
 
 Before going clarify `transform` property and how it works, let's remind some basics. With a bunch of properties and methods in `UIView`, there are only four that we need in context of this article and the rest of it focuses only these four properties to try to explain how `transform` works.
 
@@ -25,16 +25,16 @@ Before going clarify `transform` property and how it works, let's remind some ba
 
 These four properties have binding of each other, changes on one cause changes mostly on others. Simplest, for example, changes on `center` modify `frame`, and vise versa. We talk more about these relationships right below.
 
-# Relationships
+## Relationships
 
-## `frame` changes
+#### `frame` changes
 
 When `frame` changes, obviously, it causes change of `bounds` and `center` but remains `transform`.  Changes on `frame.origin` and `frame.size` result in changes on `center` and `bounds.size` respectively.
 
 > `frame.origin` *changes* `center`
 > `frame.size` *changes* `bounds.size`
 
-## `bounds` changes
+#### `bounds` changes
 
 As `bounds.size` changes, the whole `frame` changes, I mean both `frame.origin` and `frame.size`. The reason is this change is relative to the view's center point, the center point keeps the same while 4 corners move inward or outward depending on decreasing or increasing the size. System now reflects these changes to the view's superview's coordinate by change the view's `frame`.
 
@@ -46,13 +46,13 @@ As `bounds.size` changes, the whole `frame` changes, I mean both `frame.origin` 
 
 How about `bounds.origin`? It does not affect `frame` at all. It just shifts the view's content, like the way you see in `UIScrollView`.
 
-## `center` changes
+#### `center` changes
 
 Because `center` and `frame` are both determined in superview 's coordinate system, i.e., they are in the same coordinate system, no wonder that they affect each other.
 
 > `center` *changes* `frame.origin`
 
-## `transform` changes
+#### `transform` changes
 
 Now here is the most confusing of 4 properties. Don't panic. It is purely mathematics. What, mathematics? It is even more scary. No, even if you are not math genius, understanding it must not be hard.
 
@@ -65,7 +65,7 @@ As superview needs a straight rectangle to determine position and size of its ch
 
 ![View's boundary](/figures/20160823-2.png)
 
-### Scale
+###### Scale
 
 Now let's scale up and down a view. Recall the earlier explanation of `transform`, when scaling a view, in fact `transform` does not change real view's size but only do conversion the size to new size in view's superview and display it. This conversion, easy to guess, has effect on view's `frame`.
 
@@ -79,13 +79,13 @@ It is supposed to be but it is not unfortunately. As warning in `transform`, `fr
 
 Therefore the answer is shouldn't do.
 
-### Rotation
+###### Rotation
 
 Now it is time for rotation. As in earlier figure, when a view is rotated, it does not longer have a straight rectangle to represent in its superview. This comes to superview needs a boundary to position and measure the view. The view's `frame` now is actually the boundary's `frame` and it does not literally reflect view's position and size anymore.
 
 > `transform` *changes* `frame`
 
-### Combination
+###### Combination
 
 In combination of scale and rotation, the same principle is applied.
 
