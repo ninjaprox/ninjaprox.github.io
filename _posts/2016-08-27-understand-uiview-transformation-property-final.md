@@ -11,7 +11,7 @@ In previous part, we talked about 4 properties of `UIView` and relationships bet
 
 In brief, `transform` includes 6 matter values `a`, `b`, `c`, `d`, `x` and `y` as the figure below.
 
-![](https://developer.apple.com/library/ios/documentation/GraphicsImaging/Reference/CGAffineTransform/Art/equation01_2x.png)
+![](https://developer.apple.com/library/content/documentation/GraphicsImaging/Conceptual/drawingwithquartz2d/Art/equation01.gif)
 
 `a` and `d` are for scale, `x` and `y` are for translation and `a`, `b`, `c` and `d` are for rotation. However, usually, we use only scale and rotation of `transform` as for translation, we can simply use `center` property to position a view in its superview.
 
