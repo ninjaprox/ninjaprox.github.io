@@ -3,26 +3,27 @@ layout: post
 title: Bullet list on iOS with TextKit
 ---
 
-In my recent project, there is the need to display and edit bullet list on iOS, a.k.a it is a part of rich text editor. I did some rounds of searching over Google and Stack Overflow; unfortunately, there is no result satisfying me. The most common solution is adding a bullet character right in front of each item in list, which is good enough in most of cases, not mine. So what is exactly my requirement? Straightforwardly, just few things:
+In a recent project, I needed to display and edit bullet lists on iOS, i.e. as part of a rich text editor. After rounds of searching on Google and Stack Overflow, I could not find any satisfying answers. The most common solution is adding a bullet character right in front of each item in the list, which is good enough in most of cases, but not in mine. So what exactly are my requirements? Quite straightforward, just few things:
 
-* Firstly, of course, display a bullet list.
-* When I change text alignment, bullets still align nicely on the left side, regardless the alignment which can be left, center or right.
-* Last but not least, the ability to edit the list, i.e. edit, add or remove list items without hassle of handling characters.
+- First, of course, display a bullet list.
+- When changing text alignment, bullets are still aligned nicely on the left side, regardless of the alignment which can be left, center or right.
+- Last but not least, the ability to edit the list, i.e. edit, add or remove list items without the hassle of handling characters manually.
 
-With that in mind, I will go through from the solution I mentioned earlier to the final one in this post.
+With that in mind, I will go from the common solution mentioned earlier to the final one in this post.
 
-## First come-up solution
-Fairly said, this solution is simple, yet efficient in simple use cases. The idea is prepending a bullet character (•) to every new item which leads to the following.
+## The common solution
+
+To be fair, this solution is simple yet efficient in simple use cases. The idea is prepending a bullet character (•) to every new item which leads to the following.
 
 ![1st solution left alignment](/figures/20170416-1.png)
 
-To display the above list, the string underneath would be.
+To display the above list, the string underneath would be:
 
 ```
 • Bullet list\n• on iOS\n• with TextKit
 ```
 
-This looks great on left alignment and easy to make, so no complaint at the moment. Let's go ahead and change to center alignment.
+This looks great when left aligned and easy to make, so no complaints at the moment. Let's go ahead and change to center alignment.
 
 ![1st solution center alignment](/figures/20170416-2.png)
 
@@ -30,21 +31,24 @@ And right alignment.
 
 ![1st solution right alignment](/figures/20170416-3.png)
 
-Wait, bullets should align others, shouldn't them? Nice catch, and they should keep intact on the left side as well. Because we include the bullet in the item and treat it as the item's content, no wonder this behavior. One more problem does not show itself visually, when we edit an item, we can actually remove the bullet character and the space between it and the text. Moreover, when we add an item, the bullet does not come for free, we need to prepend it again to the new item's content. That being said, it is solvable by manually handling editing action, both for adding a new item and removing an item which does not appeal to me, it must be a better way.
+Wait, the bullets should vertically align each other, shouldn't they? Nice catch, and they should keep intact on the left side as well. Because we include the bullet in the item and treat it as the item's content, no wonder why this happens. Another problem that does not show itself visually: when we edit an item, we can actually remove the bullet character and the space between it and the text. Moreover, when we add an item, the bullet does not come for free, we need to prepend it again to the new item's content. That being said, it is solvable by manually handling the editing action, both for adding a new item and removing an item, which does not appeal to me. There must be a better way.
 
-So far, we have nice way to display a list on left alignment, with limitation on other alignments and labored editing approach.
+So far, we have a nice way to display a bullet list on left alignment, with limitations on other alignments and tedious editing approach.
 
 ## First attempt, draw bullets
-Usually, we should address problems one by one, divide and conquer. However, in this situation, we can kill two birds with one stone as they boil down to one actual problem. Should we consider bullet character as item's content? That is the root question for this essential problem. Undoubtedly, the answer would be one big no. Since we analyzed it earlier, if bullet character is a part of item's content, effort is needed to handle it properly and this process is error prone, better to let the system do its job unless we have a really special need. Saying so, we already eliminate one problem which is to manually handling editing, and direct all focus to the another problem.
 
-Too many words, too many explanation, where are codes, how to use `TextKit`? Wait for it, here we go. For the sake of brevity, I will not give the introduction of `TextKit` as well as its components, but explain it on usage and only parts used to solve the problem. However, it is worth to quote the following statement from [Apple's documentation](https://developer.apple.com/library/content/documentation/StringsTextFonts/Conceptual/TextAndWebiPhoneOS/CustomTextProcessing/CustomTextProcessing.html) to have a conception of `TextKit`.
+Usually, we should address problems one by one, divide and conquer. However, in this situation, we can kill two birds with one stone as they boil down to one actual problem. Should we consider the bullet character as the item's content? That is the root question for this problem. Undoubtedly, the answer would be a big no. Since we analyzed it earlier, if the bullet character is a part of an item's content, more effort is needed to handle it properly and this process is error-prone. Better to let the system do its job unless we have a really special need. With that said, we have already eliminated one problem which is to manually handling editing, and direct all focus to the other problem.
+
+You might think: too many words, too much explanation, where is the code, how to use `TextKit`?
+
+Wait for it, here we go. For the sake of brevity, I will not introduce `TextKit` and its components, but will explain it with usage and only the parts used to solve the problem. However, it is worth to quote the following statement from [Apple's documentation](https://developer.apple.com/library/content/documentation/StringsTextFonts/Conceptual/TextAndWebiPhoneOS/CustomTextProcessing/CustomTextProcessing.html) to understand the concept of `TextKit`.
 
 > In Text Kit, an `NSTextStorage` object stores the text that is displayed by a `UITextView` object and laid out by an `NSLayoutManager` object into an area defined by `NSTextContainer` object.
 And here is the relationship between them.
 
 ![TextKit components relationship](/figures/20170416-4.png)
 
-What we are trying to do is to drawing a bullet in each item, we have three candidates to look to `UITextView`, `NSLayoutManager` and `NSTextContainer` . Among three, `NSLayoutManager` is the most promising one, while we pass over `NSTextStorage` because its name implies its job related to text storage and we do not touch the text anyway. There is a bunch of methods in `NSLayoutManager`, we do not know which one to use to achieve our goal. Most of them have _glyph_ or _line fragment_ in their name. _In typography, a glyph is an elemental symbol within an agreed set of symbols, intended to represent a readable character for the purposes of writing_ ([Wikipedia](https://en.m.wikipedia.org/wiki/Glyph)). Line fragment is the extent in which a line is drawn. To draw our bullets, we need to know where to draw it and line fragment could be a hint. We will draw it on the left side of each line fragment. Fortunately, `NSLayoutManager` allows us to do both of these, do custom draw and obtain line fragments via.
+What we are trying to do is drawing a bullet in each item. We have three candidates to look into: `UITextView`, `NSLayoutManager` and `NSTextContainer`. Among these, `NSLayoutManager` is the most promising one. We pass on `NSTextStorage` because its name implies its job is related to text storage and we do not touch the text in any way. There are a bunch of methods in `NSLayoutManager`, we do not know which one to use to achieve our goal. Most of them have _glyph_ or _line fragment_ in their name. _In typography, a glyph is an elemental symbol within an agreed set of symbols, intended to represent a readable character for the purposes of writing_ ([Wikipedia](https://en.m.wikipedia.org/wiki/Glyph)). Line fragment is the extent in which a line is drawn. To draw our bullets, we need to know where to draw it and line fragment could be a hint. We will draw it on the left side of each line fragment. Fortunately, `NSLayoutManager` allows us to do both of these, doing custom drawing and obtaining line fragments via.
 
 ```swift
 drawGlyphs(forGlyphRange:at:)
@@ -58,7 +62,7 @@ enumerateLineFragments(forGlyphRange:using:)
 
 > Enumerates line fragments intersecting with the given glyph range.
 
-We will subclass `NSLayoutManager` to override these two methods and bring bullets to live.
+We will subclass `NSLayoutManager` to override these two methods and bring the bullets to life.
 
 ```swift
 class BulletListLayoutManager: NSLayoutManager {
@@ -79,9 +83,10 @@ class BulletListLayoutManager: NSLayoutManager {
 }
 ```
 
-Pretty simple, right? One note here is the calculation of `y` of bullet since we want bullet vertically aligns to item’s content. An another thing worth to mention is `super.drawGlyphs(forGlyphRange: glyphsToShow, at: origin)`, make sure that we do not forget to call it or nothing is drawn at all.
+Pretty simple, right? One thing to note here is the calculation of `y` of the bullet since we want it vertically aligned to the item's content. Another thing worth mentioning is `super.drawGlyphs(forGlyphRange: glyphsToShow, at: origin)`, make sure we do not forget to call it or nothing gets drawn at all.
 
 Now we create `NSTextView` with `BulletListLayoutManager` instead of default `NSLayoutManager`.
+
 
 ```swift
 let textStorage = NSTextStorage()
@@ -93,12 +98,13 @@ let textView = UITextView(frame: CGRect(x: 0, y: 0, width: 400, height: 200),
                           textContainer: textContainer)
 ```
 
-The relationship between components guides us to create and assemble them together to create a `NSTextView` with underlying `BulletListLayoutManager` which again is used to draw bullets. Up to this point, we have our first result.
+The relationship between these components guides us to create and assemble them to create an `NSTextView` with the underlying `BulletListLayoutManager` which again is used to draw bullets. Up to this point, we have our first result.
 
 ![Draw bullets result](/figures/20170416-5.png)
 
 ## Indentation
-We have just drawn bullets and had them beautifully in place without any additional character added to item's content, but we are not done yet. Look at the result above, you probably notice that bullets are overlapping item's content, not what we want. On the bright side, just a small adjustment can fix this. Have you known that we have control of indent of the first line and another lines in a same paragraph by just using `attributedText` of `UITextView`? With this great support from `TextKit`, it is easy to shift right item's content and leave a consistent space between it and the bullet.
+
+We have drawn bullets and have them beautifully in place without any additional characters added to the item's content, but we are not done yet. Look at the result above, you will probably notice that the bullets are overlapping the item's content, not what we want. On the bright side, just a small adjustment can fix this. Did you know that we have control of the indent of the first line and other lines in a same paragraph by just using `attributedText` of `UITextView`? With this great support from `TextKit`, it is easy to shift the right item's content and leave a consistent space between it and the bullet.
 
 ```swift
 let style = NSMutableParagraphStyle()
@@ -113,7 +119,7 @@ attributedString.addAttribute(NSParagraphStyleAttributeName,
 textView.attributedText = attributedString
 ```
 
-Here we set the same indent for the first line and onward lines, and apply this style to the whole list to assure we have all lines left aligned.
+Here we set the same indent for the first line and other lines onwards, and apply this style to the whole list to ensure we have all lines left aligned.
 
 ![Indentation result](/figures/20170416-6.png)
 
@@ -124,7 +130,8 @@ Let's test with center and right alignment.
 ![Indentation right alignment result](/figures/20170416-8.png)
 
 ## Wrapped item
-We are almost there, just one final step. Again, look at the result we have previously, could you find out any weird thing? _Hint: We have only three items in the list._ "You just said there were only there items?", you asked, "So where is the forth bullet come from?". Bingo, you got it. The thing is the last item is wrapped to two lines and due to the way we draw bullets, how many lines we have, as so how many corresponding bullets. Ideally, each item should only have one bullet, regardless how many lines it contains. On the other hand, we just draw bullet for the first line, a.k.a line fragment of each item. Sounds simple but how do we determine whether or not a line is the first one or second and so in an item? _Hint: Using new character._ Let me recall the underlying string of the list.
+
+We are almost there, just one final step. Again, look at the result we have previously, could you find anything weird? _Hint: We have only three items in the list._ “So where is the fourth bullet come from?”, you asked. Bingo, you got it. The thing is the last item is wrapped to two lines and due to the way we draw bullets, there is one corresponding bullet for each line. Ideally, each item should only have one bullet, regardless how many lines it contains, thus we only have to draw one bullet for the first line, a.k.a the line fragment of each item. Sounds simple but how do we determine whether or not a line is the first one or second in an item? _Hint: Using the new line character._ Let me recall the underlying string of the list.
 
 ```
 Bullet list\non iOS\nwith TextKit. Bullet list on iOS with TextKit.
@@ -161,20 +168,21 @@ class BulletListLayoutManager: NSLayoutManager {
 }
 ```
 
-We treat the first line fragment is a new line by default. With the rest lines, we get the character right in front of the content of that line, then check if it is `\n`. Here we are, our final result.
+We treat the first line fragment as a new line by default. For the rest lines, we get the character right in front of the content of that line, then check if it is `\n`. Here we are, our final result.
 
 ![Final result](/figures/20170416-9.png)
 
 ## Conclusion
-I have walked you through the whole process, from thinking, making decision to implementation that is exactly what in my mind while I was doing it. This is, however, just the beginning, there are still lots of room for you explore `TextKit`, tweak it and make it your solution for your problem. I can name some of remaining things to improve and leave them as for your exercises.
 
-* Change bullets size corresponding to font size.
-* When we change line height, content does not align bullet anymore, then we need a fix for this.
-* Instead of black dot bullet, can we make other types of bullet?
+I have walked you through the whole process, from thinking, making decision to implementation that was exactly in my mind while I was doing it. This is, however, just the beginning, there are still lots of room for you explore `TextKit`, tweak it and make it your own solution to your problem. I can name some remaining things to improve and leave them as exercises for you.
+
+- Change bullets size according to font size.
+- When we change line height, content does not align to the bullet anymore, we need a fix for this.
+- Instead of black dot bullets, can we make other types of bullet?
 
 ## Behind the scene
 
-I obscured some codes to keep the post focused on what matters. However, it is two-bladed knife, while it is short, it may make you perplexed, so better to uncover everything. There are two things I did not mention throughout the post. The first one is the text view and the style have been preconfigured as below to simplify the implementation of `BulletListLayoutManager`.
+I obscured some of the code to keep the post focused on what matters. However, it is a two-bladed knife, while it is short, it may perplex you, so it is better to uncover everything. There are two things I did not mention throughout the post. The first one is the text view and the style have been preconfigured as below to simplify the implementation of `BulletListLayoutManager`.
 
 ```swift
 textView.textContainerInset = .zero
@@ -184,7 +192,7 @@ style.minimumLineHeight = fontSize
 style.maximumLineHeight = fontSize
 ```
 
-And if you notice, `string.substring()` only accepts `Range<String.Index>` as parameter, not `NSRange`. I created extension of `String` with `NSRange` support so that the method works seamlessly with `NSRange`.
+And if you notice, `string.substring()` only accepts `Range<String.Index>` as parameter, not `NSRange`. I created an extension of `String` with `NSRange` support so that the method works seamlessly with `NSRange`.
 
 ```swift
 extension String {
@@ -198,7 +206,8 @@ extension String {
 ```
 
 ## References
-I recommend you to go through the following references, they are great resources, talks and libraries that helps me a lot to realize the idea.
+
+I recommend you to go through the following references, they are great resources, talks and libraries that helped me a lot to realize this idea.
 
 * [Mastering TextKit](https://realm.io/news/tryswift-katsumi-kishikawa-mastering-textkit-swift-ios/)
 * [Easy, Beautiful Typography with BonMot](https://realm.io/news/altconf-zev-eisenberg-easy-beautiful-typography-bonmot-library-ios-swift/)
