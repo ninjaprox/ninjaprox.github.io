@@ -1,6 +1,6 @@
 ---
 layout: post
-title: How to ignore/hide change from Git
+title: How to ignore/hide changes from Git
 ---
 
 Git is a popular distributed version control system, which helps keeping track of changes less hassle. In some scenarios, we might want Git to ignore some changes or hide them from Git. In this post, we'll explore a couple of ways to do so.
